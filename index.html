@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diction — Précision de la Prononciation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,200;0,300;0,400;1,200;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #07080c;
+    --surface: #0e1018;
+    --surface2: #141720;
+    --border: #1c2030;
+    --text: #eef0f8;
+    --text2: #b8bdd4;
+    --muted: #6a7090;
+    --accent: #d4a8ff;
+    --accent2: #ffb347;
+    --accent3: #7ee8a2;
+    --red: #ff7070;
+    --step1: #7ee8a2;
+    --step2: #7eb8f5;
+    --step3: #ffb347;
+    --step4: #d4a8ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Fraunces', Georgia, serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    padding-bottom: 60px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; height: 400px;
+    background: radial-gradient(ellipse at 60% 0%, rgba(212,168,255,0.05) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    width: 100%; max-width: 860px;
+    padding: 32px 24px 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    position: relative; z-index: 10;
+  }
+
+  .logo h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 200;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .logo h1 em { color: var(--accent); font-style: italic; }
+
+  .logo p {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+
+  .header-pills {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  }
+
+  .pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    text-align: center;
+  }
+
+  .pill .val {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .pill .lbl {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.52rem;
+    color: var(--muted);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  /* ── METHOD BOX ── */
+  .method-banner {
+    width: calc(100% - 48px);
+    max-width: 860px;
+    margin: 20px 24px 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative; z-index: 10;
+  }
+
+  .method-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: none;
+    border: none;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-align: left;
+  }
+
+  .method-toggle span { color: var(--accent); }
+
+  .method-content {
+    display: none;
+    padding: 0 18px 16px;
+    font-size: 0.78rem;
+    color: var(--text2);
+    line-height: 1.85;
+    border-top: 1px solid var(--border);
+  }
+
+  .method-content.open { display: block; }
+
+  .method-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .method-step {
+    border-radius: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .step-title { font-size: 0.82rem; font-weight: 300; margin-bottom: 4px; color: var(--text); }
+  .step-desc { font-size: 0.7rem; color: var(--muted); line-height: 1.6; font-style: italic; }
+
+  /* ── LETTER SELECTOR ── */
+  .section {
+    width: 100%; max-width: 860px;
+    padding: 20px 24px 0;
+    position: relative; z-index: 10;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .letter-grid {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .letter-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 500;
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+
+  .letter-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(212,168,255,0.06); }
+  .letter-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .letter-btn.done::after {
+    content: '✓';
+    position: absolute;
+    top: 1px; right: 3px;
+    font-size: 0.5rem;
+    color: var(--accent3);
+  }
+
+  /* ── PHRASE CARDS ── */
+  .phrases-section {
+    width: 100%; max-width: 860px;
+    padding: 16px 24px 0;
+    position: relative; z-index: 10;
+  }
+
+  .phrase-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .phrase-card.selected { border-color: var(--accent); }
+  .phrase-card.completed { border-color: var(--accent3); }
+
+  .phrase-header {
+    padding: 14px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .phrase-header:hover { background: var(--surface2); }
+
+  .phrase-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .phrase-text {
+    font-size: 1.05rem;
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--text);
+    flex: 1;
+    letter-spacing: 0.01em;
+  }
+
+  .phrase-text em { color: var(--accent); font-style: normal; font-weight: 400; }
+
+  .phrase-select-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.18s;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .phrase-select-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .phrase-select-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .phrase-select-btn.done { border-color: var(--accent3); color: var(--accent3); }
+
+  /* ── EXERCISE PANEL ── */
+  .exercise-panel {
+    width: 100%; max-width: 860px;
+    padding: 0 24px;
+    position: relative; z-index: 10;
+    margin-top: 8px;
+  }
+
+  .ex-card {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    overflow: hidden;
+    display: none;
+  }
+
+  .ex-card.visible { display: block; }
+
+  /* Selected phrase display */
+  .selected-phrase-display {
+    padding: 24px 24px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .spd-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .spd-text {
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--text);
+    letter-spacing: 0.01em;
+  }
+
+  /* Step navigator */
+  .step-nav {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  .step-tab {
+    flex: 1;
+    min-width: 120px;
+    padding: 14px 12px;
+    text-align: center;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    background: none;
+    border-top: none; border-left: none; border-right: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+
+  .step-tab:hover { color: var(--text); }
+  .step-tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+  .step-tab .step-icon { font-size: 1.1rem; display: block; margin-bottom: 4px; }
+
+  /* Step content */
+  .step-content {
+    padding: 20px 24px;
+    display: none;
+  }
+
+  .step-content.active { display: block; }
+
+  .step-instruction {
+    font-size: 0.88rem;
+    color: var(--text2);
+    line-height: 1.85;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+
+  .step-instruction strong { color: var(--text); font-style: normal; font-weight: 400; }
+
+  /* Sub-steps checklist */
+  .substeps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .substep {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .substep:hover { border-color: var(--muted); }
+  .substep.checked { border-color: var(--accent3); background: rgba(126,232,162,0.05); }
+
+  .substep-check {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem;
+    color: transparent;
+    transition: all 0.18s;
+    margin-top: 1px;
+  }
+
+  .substep.checked .substep-check {
+    background: var(--accent3);
+    border-color: var(--accent3);
+    color: var(--bg);
+  }
+
+  .substep-text {
+    font-size: 0.82rem;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  .substep.checked .substep-text { color: var(--muted); text-decoration: line-through; }
+
+  /* Reading display with word highlight */
+  .reading-display {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    font-size: 1.15rem;
+    line-height: 2;
+    color: var(--text);
+    font-weight: 300;
+    letter-spacing: 0.01em;
+  }
+
+  .reading-display .word {
+    display: inline-block;
+    margin: 0 3px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: all 0.1s;
+    cursor: pointer;
+  }
+
+  .reading-display .word.highlighted {
+    background: rgba(212,168,255,0.2);
+    color: var(--accent);
+  }
+
+  .reading-display .word.done-word {
+    color: var(--muted);
+  }
+
+  /* Speed control */
+  .speed-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .speed-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  input[type=range].speed-slider {
+    flex: 1;
+    min-width: 100px;
+    -webkit-appearance: none;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range].speed-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(212,168,255,0.4);
+  }
+
+  .speed-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    min-width: 36px;
+  }
+
+  /* Pencil note */
+  .pencil-note {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    background: rgba(255,179,71,0.06);
+    border: 1px solid rgba(255,179,71,0.25);
+    border-radius: 10px;
+    font-size: 0.72rem;
+    color: var(--text2);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .pencil-note strong { color: var(--accent2); }
+
+  /* Step action btn */
+  .step-btn {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    padding: 11px 22px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+
+  .btn-primary { background: var(--accent); color: var(--bg); }
+  .btn-primary:hover { filter: brightness(1.1); box-shadow: 0 0 20px rgba(212,168,255,0.35); }
+
+  .btn-secondary {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-success { background: var(--accent3); color: var(--bg); }
+  .btn-success:hover { filter: brightness(1.1); box-shadow: 0 0 20px rgba(126,232,162,0.35); }
+
+  .btn-next {
+    background: var(--surface2);
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+  }
+  .btn-next:hover { background: rgba(255,179,71,0.1); }
+
+  /* Timer */
+  .timer-display {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  /* Progress strip */
+  .progress-strip {
+    display: flex;
+    height: 4px;
+  }
+
+  .progress-seg {
+    flex: 1;
+    background: var(--border);
+    transition: background 0.4s;
+  }
+
+  .progress-seg + .progress-seg { border-left: 1px solid var(--bg); }
+  .progress-seg.done { background: var(--accent3); }
+  .progress-seg.active { background: var(--accent); }
+
+  /* XP popup */
+  .xp-popup {
+    position: fixed;
+    top: 80px; right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 100px;
+    padding: 8px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    z-index: 999;
+    pointer-events: none;
+    animation: popAnim 2s ease-out forwards;
+  }
+
+  @keyframes popAnim {
+    0%  { opacity: 0; transform: translateY(8px); }
+    15% { opacity: 1; transform: translateY(0); }
+    75% { opacity: 1; }
+    100%{ opacity: 0; transform: translateY(-16px); }
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+    font-style: italic;
+    font-size: 0.9rem;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  @media (max-width: 600px) {
+    .spd-text { font-size: 1rem; }
+    .method-steps { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <h1>Exercices de<br><em>Diction</em></h1>
+    <p>Précision de la prononciation · Méthode complète</p>
+  </div>
+  <div class="header-pills">
+    <div class="pill"><div class="val" id="statPhrases">0</div><div class="lbl">Phrases</div></div>
+    <div class="pill"><div class="val" id="statXP">0</div><div class="lbl">XP</div></div>
+    <div class="pill"><div class="val" id="statTime">0:00</div><div class="lbl">Durée</div></div>
+  </div>
+</div>
+
+<!-- METHOD BANNER -->
+<div class="method-banner">
+  <button class="method-toggle" id="methodToggle">
+    <span>📋 <span style="color:var(--text)">Méthode en 4 étapes</span> — Cliquez pour voir les instructions</span>
+    <span id="methodArrow">▼</span>
+  </button>
+  <div class="method-content" id="methodContent">
+    <div style="margin-top:12px; font-size:0.78rem; color:var(--text2); line-height:1.8;">
+      Avant chaque prononciation, prenez une <strong style="color:var(--text)">courte inspiration</strong>. Ouvrez grand la bouche, articulez de manière <strong style="color:var(--text)">exagérée</strong>. Prononcez correctement chaque syllabe et les mots de liaison.
+    </div>
+    <div class="method-steps">
+      <div class="method-step">
+        <div class="step-num" style="color:var(--step1)">① Intermédiaire</div>
+        <div class="step-title">Fort et lentement ×3</div>
+        <div class="step-desc">a) Concentrez-vous sur la prononciation<br>b) Écoutez-vous prononcer<br>c) Exagérez la prononciation</div>
+      </div>
+      <div class="method-step">
+        <div class="step-num" style="color:var(--step2)">② Souffle unique</div>
+        <div class="step-title">En une seule respiration</div>
+        <div class="step-desc">Inspirez aux virgules ou à chaque ligne si la phrase est longue</div>
+      </div>
+      <div class="method-step">
+        <div class="step-num" style="color:var(--step3)">③ Avancé · Crayon</div>
+        <div class="step-title">Avec crayon en bouche ×3</div>
+        <div class="step-desc">Placez le crayon entre canines et prémolaires. Inspirez tous les 2-3 mots si nécessaire</div>
+      </div>
+      <div class="method-step">
+        <div class="step-num" style="color:var(--step4)">④ Libération</div>
+        <div class="step-title">Sans crayon, en une respiration</div>
+        <div class="step-desc">Ressentez la légèreté nouvelle. Recommencez 3-4 fois. Soutien du souffle.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LETTER SELECTOR -->
+<div class="section">
+  <div class="section-label">Choisir une lettre travaillée</div>
+  <div class="letter-grid" id="letterGrid"></div>
+</div>
+
+<!-- PHRASES LIST -->
+<div class="phrases-section" id="phrasesSection">
+  <div class="section-label" style="margin-bottom:12px" id="phrasesLabel">Sélectionnez une lettre</div>
+  <div id="phrasesList"><div class="empty-state">← Choisissez une lettre ci-dessus pour afficher les phrases</div></div>
+</div>
+
+<!-- EXERCISE PANEL -->
+<div class="exercise-panel">
+  <div class="ex-card" id="exCard">
+
+    <!-- Progress strip -->
+    <div class="progress-strip" id="progressStrip">
+      <div class="progress-seg active" data-step="0"></div>
+      <div class="progress-seg" data-step="1"></div>
+      <div class="progress-seg" data-step="2"></div>
+      <div class="progress-seg" data-step="3"></div>
+    </div>
+
+    <!-- Selected phrase -->
+    <div class="selected-phrase-display">
+      <div class="spd-label">📖 Phrase sélectionnée</div>
+      <div class="spd-text" id="spdText"></div>
+    </div>
+
+    <!-- Step tabs -->
+    <div class="step-nav">
+      <button class="step-tab active" data-step="0">
+        <span class="step-icon">🎯</span>Fort & Lent ×3
+      </button>
+      <button class="step-tab" data-step="1">
+        <span class="step-icon">💨</span>Souffle unique
+      </button>
+      <button class="step-tab" data-step="2">
+        <span class="step-icon">✏️</span>Crayon ×3
+      </button>
+      <button class="step-tab" data-step="3">
+        <span class="step-icon">🌟</span>Libération
+      </button>
+    </div>
+
+    <!-- STEP 0: Fort et lentement x3 -->
+    <div class="step-content active" id="step-0">
+      <div class="step-instruction">
+        Lisez la phrase <strong>fort et lentement, 3 fois de suite</strong>.<br>
+        En cas d'erreur : reprenez encore plus lentement en vous concentrant sur chaque syllabe.
+      </div>
+      <div class="reading-display" id="readingDisplay0"></div>
+      <div class="speed-row">
+        <span class="speed-label">⏱ Vitesse de lecture</span>
+        <input type="range" class="speed-slider" id="speedSlider0" min="1" max="5" value="2">
+        <span class="speed-val" id="speedVal0">Lente</span>
+      </div>
+      <div class="substeps" id="substeps0">
+        <div class="substep" data-idx="0">
+          <div class="substep-check">✓</div>
+          <div class="substep-text"><strong>Lecture a)</strong> — Concentré sur la prononciation des mots</div>
+        </div>
+        <div class="substep" data-idx="1">
+          <div class="substep-check">✓</div>
+          <div class="substep-text"><strong>Lecture b)</strong> — Prononciation + écoute de vous-même</div>
+        </div>
+        <div class="substep" data-idx="2">
+          <div class="substep-check">✓</div>
+          <div class="substep-text"><strong>Lecture c)</strong> — Prononciation exagérée de chaque mot</div>
+        </div>
+      </div>
+      <div class="step-btn">
+        <button class="btn btn-primary" id="btnRead0">▶ Démarrer lecture guidée</button>
+        <button class="btn btn-next" onclick="goStep(1)">Étape suivante →</button>
+      </div>
+    </div>
+
+    <!-- STEP 1: Souffle unique -->
+    <div class="step-content" id="step-1">
+      <div class="step-instruction">
+        Lisez la phrase <strong>en une seule respiration</strong>. Si la phrase est longue, inspirez à chaque virgule ou à chaque ligne.
+      </div>
+      <div class="reading-display" id="readingDisplay1"></div>
+      <div class="substeps" id="substeps1">
+        <div class="substep" data-idx="0">
+          <div class="substep-check">✓</div>
+          <div class="substep-text">Prenez une <strong>grande inspiration</strong> avant de commencer</div>
+        </div>
+        <div class="substep" data-idx="1">
+          <div class="substep-check">✓</div>
+          <div class="substep-text">Lisez <strong>fort et lentement</strong> en une seule respiration</div>
+        </div>
+        <div class="substep" data-idx="2">
+          <div class="substep-check">✓</div>
+          <div class="substep-text">Inspirez aux <strong>virgules</strong> si nécessaire</div>
+        </div>
+      </div>
+      <div class="step-btn">
+        <button class="btn btn-secondary" onclick="goStep(0)">← Retour</button>
+        <button class="btn btn-next" onclick="goStep(2)">Étape suivante →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Crayon -->
+    <div class="step-content" id="step-2">
+      <div class="pencil-note">
+        <span style="font-size:1.4rem">✏️</span>
+        <span><strong>Mise en place du crayon :</strong> Ouvrez grand la bouche · Placez le crayon entre canines et prémolaires · Serrez les dents sans forcer · Langue au-dessus du crayon, en contact avec le palais</span>
+      </div>
+      <div class="step-instruction">
+        Lisez la phrase <strong>fort et lentement, 3 fois</strong> avec le crayon. Inspirez tous les 2-3 mots si nécessaire.
+      </div>
+      <div class="reading-display" id="readingDisplay2"></div>
+      <div class="substeps" id="substeps2">
+        <div class="substep" data-idx="0">
+          <div class="substep-check">✓</div>
+          <div class="substep-text"><strong>Crayon a)</strong> — Concentration sur la prononciation</div>
+        </div>
+        <div class="substep" data-idx="1">
+          <div class="substep-check">✓</div>
+          <div class="substep-text"><strong>Crayon b)</strong> — Prononciation + écoute de vous-même</div>
+        </div>
+        <div class="substep" data-idx="2">
+          <div class="substep-check">✓</div>
+          <div class="substep-text"><strong>Crayon c)</strong> — Prononciation exagérée avec le crayon</div>
+        </div>
+      </div>
+      <div class="step-btn">
+        <button class="btn btn-secondary" onclick="goStep(1)">← Retour</button>
+        <button class="btn btn-next" onclick="goStep(3)">Étape suivante →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Libération -->
+    <div class="step-content" id="step-3">
+      <div class="step-instruction">
+        Retirez le crayon. Lisez la phrase <strong>fort et lentement</strong> — ressentez la <em>légèreté nouvelle</em> obtenue grâce au crayon. Recommencez <strong>3 à 4 fois en une seule respiration</strong>.
+      </div>
+      <div class="reading-display" id="readingDisplay3"></div>
+      <div class="substeps" id="substeps3">
+        <div class="substep" data-idx="0">
+          <div class="substep-check">✓</div>
+          <div class="substep-text">Lecture <strong>1</strong> — Ressentez la légèreté après le crayon</div>
+        </div>
+        <div class="substep" data-idx="1">
+          <div class="substep-check">✓</div>
+          <div class="substep-text">Lecture <strong>2</strong> — Grande inspiration, phrase en un souffle</div>
+        </div>
+        <div class="substep" data-idx="2">
+          <div class="substep-check">✓</div>
+          <div class="substep-text">Lecture <strong>3</strong> — Soutien du souffle, articulation parfaite</div>
+        </div>
+        <div class="substep" data-idx="3">
+          <div class="substep-check">✓</div>
+          <div class="substep-text">Lecture <strong>4</strong> — Naturel et fluide, sans effort conscient</div>
+        </div>
+      </div>
+      <div class="step-btn">
+        <button class="btn btn-secondary" onclick="goStep(2)">← Retour</button>
+        <button class="btn btn-success" id="btnComplete">✓ Phrase maîtrisée !</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── PHRASES DATA (from PDF) ──
+const PHRASES = {
+  'B': [
+    "Babylas baladin emballe bonnement des balles tandis que Babette ballerine étoile du corps de ballet se balance mollement sur le bout d'une barre de bois.",
+    "Brosse la bâche, baisse la broche.",
+  ],
+  'C': [
+    "Lorsqu'un cordier cordant veut sa corde accordée, trois cordons de la corde il décorde. Si le cordon de la corde décorde, le cordon décordé fait décorder la corde.",
+  ],
+  'CH': [
+    "Les chemises de l'archiduchesse sont-elles sèches ou archi sèches.",
+    "Chasseurs qui sachez chasser sans chien, sachez chasser ce chat de ce châssis.",
+    "Natacha n'attacha pas son chat Pacha qui s'échappa, cela fâcha Sacha qui chassa Natacha.",
+    "Sachez que Sacha cherche ses cent six sachets de serge chez Sancho le changeur et que le chien du sage chasseur chasse ses chats dans les souches sèches des sauges sauvages.",
+    "Sur son passage, six chastes chérubins siciliens, juchés sur six sièges, chuchotèrent ceci : «Salut, sire chasseur, citoyen sage et plein d'âge, aux yeux chassieux, au sang chaud, sois chanceux.»",
+  ],
+  'D': [
+    "Didon dina dit-on de dix dos dodus de dix dodus dindons.",
+    "Un dentiste en piste domptait dix dompteurs édenté.",
+  ],
+  'F': [
+    "Un faux fauve fautif faucha la fofolle Fanchon sans fanfare.",
+    "Fraises fraîches, fraîches fraises.",
+  ],
+  'G': [
+    "Le magique moujik mugit gémissant sans génie s'ingéniant à gêner la muse. Amusé, le moujik a misé et la muse au musée a osé.",
+    "Un ange qui songeait à changer son visage pour donner le change, se vit si changé, que loin de louanger ce changement, il jugea que tous les anges ne rechangerait jamais, et jamais plus ange ne songea à se changer.",
+  ],
+  'GR': [
+    "Dis-moi gros gras grand grain d'orge, quand te dégros gras grand grain d'orgeras-tu ? Je me dégros gras grand grain d'orgerai, quand tous les gros gras grains d'orge se seront dégros gras grand grain d'orges.",
+    "Un gueux grogne dans la grange du grand-père grognon.",
+  ],
+  'L': [
+    "Le Dalaï lama a la dalle à Lima et casse la dalle à Dallas. Du Lima au Mali et du Mali au Lima il lit mal, le Dalaï lama.",
+    "Le lin léger se lie le long de l'eau limpide.",
+  ],
+  'M': [
+    "Le mastoc moustique excité mastique Max, le mystique mexicain masqué.",
+    "La maman du manant manie nos manies maniaques sans manière.",
+  ],
+  'O': [
+    "L'intrus obtus obture l'obus. L'intrus obture l'obus obtus.",
+    "Onze oncles, onze ongles, on jongle. L'ongle de l'oncle, l'angle de l'ongle.",
+  ],
+  'P': [
+    "Paul se pèle au pôle dans une pile de pulls et de polos pâles. Pas plus d'appel de la poule en Opel que d'opale dans la pelle à Paul.",
+    "Un banc peint blanc plein de pain blanc, un blanc banc peint plein de blanc pain.",
+    "Un pêcheur péchait à l'ombre d'un pêché, le pêché empêchait le pécheur de pécher, le pécheur coupa le pêché, le pêché n'empêcha plus le pécheur de pécher.",
+    "Passant, penses-tu passer par ce passage où passant, j'ai passé ? Si tu n'y pense pas, passant, tu n'es pas sage.",
+  ],
+  'Q': [
+    "Quatre coquets coqs croquaient quatre croquantes coquilles.",
+  ],
+  'R': [
+    "Le cri cri de la crique crit son cri cru et critique car il craint que l'escroc ne le craque ou le croque.",
+    "Il faut que je roule, il faut que tu roules, il faut qu'il roule, il faut que nous roulions, il faut que vous rouliez, il faut qu'ils roulent.",
+    "Très grand doreur quand redoreras-tu sûrement et d'un goût rare mes trente-trois mille trois cent trente-trois très grandes cuillers d'or trop argentées ?",
+  ],
+  'S': [
+    "Madame S. est une Suissesse. Au sous-sol de sa maison, elle chausse ses souliers secs, saisit son sac et sort sur le seuil, seule dans le silence du soir.",
+    "Si c'est six cigares coûtent six sous, ces six cents six cigares coûteront six cents six sous.",
+    "L'assassin sur son sein suçait son sang sans cesse.",
+  ],
+  'T': [
+    "Tonton toto, ton thé t'a t-il oté ta toux ? Tout étant à tenter, toto, pour que tout aille, ta tante et ton tonton t'ont oté tour à tour, ta toque et ton tutu.",
+    "Totor t'as tort, tu t'uses et tu te tues, pourquoi t'entêtes-tu ? En t'entêtant, t'entends Totor, tu te tues et t'as tort.",
+  ],
+  'U': [
+    "Si tu m'eusses cru. Tu te fusses tu. Te fusses-tu tu, Tu m'eusses plus cru !",
+  ],
+  'V': [
+    "C'est l'évadé du Nevada qui s'évada dans la vallée, dans la vallée du Nevada qu'il dévala pour s'évader sur un vilain vélo volé.",
+    "La cavale au Valaque avala l'eau du lac. L'eau du lac lava la cavale au Valaque.",
+  ],
+  'X': [
+    "Le fisc fixe exprès chaque taxe fixe excessive exclusivement au luxe et à l'exquis.",
+    "J'excuse cet exquis exploit et tu excuse cet exploit exquis.",
+    "Éloïse, l'exquise Marquise dyslexique esquisse une valse triste, glisse et brise un vase d'Onyx.",
+  ],
+};
+
+const LETTERS = Object.keys(PHRASES);
+const SPEED_LABELS = ['Très lente', 'Lente', 'Normale', 'Soutenue', 'Rapide'];
+const SPEED_MS = [800, 550, 380, 260, 160];
+
+// ── STATE ──
+let currentLetter = null;
+let currentPhraseIdx = null;
+let currentStep = 0;
+let donePhrases = {};
+let totalXP = 0;
+let phrasesCompleted = 0;
+let sessionStart = Date.now();
+let readInterval = null;
+let wordIdx = 0;
+let readSpeed = 1; // index into SPEED_MS
+
+// ── INIT ──
+function init() {
+  renderLetterGrid();
+  setInterval(updateTimer, 1000);
+
+  // Method toggle
+  document.getElementById('methodToggle').addEventListener('click', () => {
+    const c = document.getElementById('methodContent');
+    const a = document.getElementById('methodArrow');
+    c.classList.toggle('open');
+    a.textContent = c.classList.contains('open') ? '▲' : '▼';
+  });
+
+  // Substep clicks
+  document.querySelectorAll('.substep').forEach(el => {
+    el.addEventListener('click', () => el.classList.toggle('checked'));
+  });
+
+  // Speed sliders
+  document.getElementById('speedSlider0').addEventListener('input', e => {
+    readSpeed = parseInt(e.target.value) - 1;
+    document.getElementById('speedVal0').textContent = SPEED_LABELS[readSpeed];
+  });
+
+  // Read button
+  document.getElementById('btnRead0').addEventListener('click', toggleRead);
+
+  // Complete button
+  document.getElementById('btnComplete').addEventListener('click', completePhrase);
+
+  // Step tabs
+  document.querySelectorAll('.step-tab').forEach(tab => {
+    tab.addEventListener('click', () => goStep(parseInt(tab.dataset.step)));
+  });
+}
+
+// ── LETTER GRID ──
+function renderLetterGrid() {
+  const grid = document.getElementById('letterGrid');
+  grid.innerHTML = LETTERS.map(l =>
+    `<button class="letter-btn ${l === currentLetter ? 'active' : ''} ${donePhrases[l]?.size >= PHRASES[l].length ? 'done' : ''}" data-l="${l}">${l}</button>`
+  ).join('');
+  grid.querySelectorAll('.letter-btn').forEach(btn => {
+    btn.addEventListener('click', () => selectLetter(btn.dataset.l));
+  });
+}
+
+// ── SELECT LETTER ──
+function selectLetter(letter) {
+  stopRead();
+  currentLetter = letter;
+  currentPhraseIdx = null;
+  document.getElementById('exCard').classList.remove('visible');
+  renderLetterGrid();
+
+  const phrases = PHRASES[letter];
+  document.getElementById('phrasesLabel').textContent =
+    `Lettre ${letter} — ${phrases.length} phrase${phrases.length > 1 ? 's' : ''}`;
+
+  const list = document.getElementById('phrasesList');
+  const done = donePhrases[letter] || new Set();
+
+  list.innerHTML = phrases.map((p, i) => {
+    const isDone = done.has(i);
+    return `
+      <div class="phrase-card ${isDone ? 'completed' : ''}" id="pcard-${i}">
+        <div class="phrase-header">
+          <div class="phrase-number">${letter}${i + 1}</div>
+          <div class="phrase-text">${highlightLetter(p, letter)}</div>
+          <button class="phrase-select-btn ${isDone ? 'done' : ''}" data-i="${i}">
+            ${isDone ? '✓ Fait' : 'Pratiquer'}
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+
+  list.querySelectorAll('.phrase-select-btn').forEach(btn => {
+    btn.addEventListener('click', () => selectPhrase(parseInt(btn.dataset.i)));
+  });
+}
+
+function highlightLetter(text, letter) {
+  // Highlight the target letter/sound
+  const l = letter.toLowerCase();
+  const regex = new RegExp(`(${l})`, 'gi');
+  return text.replace(regex, '<em>$1</em>');
+}
+
+// ── SELECT PHRASE ──
+function selectPhrase(idx) {
+  stopRead();
+  currentPhraseIdx = idx;
+  currentStep = 0;
+  wordIdx = 0;
+
+  const phrase = PHRASES[currentLetter][idx];
+
+  // Update card highlight
+  document.querySelectorAll('.phrase-card').forEach((c, i) => {
+    c.classList.toggle('selected', i === idx);
+  });
+  document.querySelectorAll('.phrase-select-btn').forEach((b, i) => {
+    const isDone = (donePhrases[currentLetter] || new Set()).has(i);
+    b.classList.toggle('active', i === idx && !isDone);
+  });
+
+  // Show phrase in exercise panel
+  document.getElementById('spdText').textContent = phrase;
+  document.getElementById('exCard').classList.add('visible');
+
+  // Populate reading displays
+  [0,1,2,3].forEach(s => {
+    const rd = document.getElementById(`readingDisplay${s}`);
+    if (rd) rd.innerHTML = phraseToWords(phrase);
+  });
+
+  // Reset substeps
+  document.querySelectorAll('.substep').forEach(s => s.classList.remove('checked'));
+  document.querySelectorAll('.progress-seg').forEach((s, i) => {
+    s.classList.toggle('active', i === 0);
+    s.classList.remove('done');
+  });
+
+  goStep(0);
+
+  // Scroll to panel
+  document.getElementById('exCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function phraseToWords(text) {
+  return text.split(/(\s+)/).map((tok, i) => {
+    if (/^\s+$/.test(tok)) return tok;
+    return `<span class="word" data-i="${i}">${tok}</span>`;
+  }).join('');
+}
+
+// ── READING GUIDE ──
+function toggleRead() {
+  const btn = document.getElementById('btnRead0');
+  if (readInterval) {
+    stopRead();
+    btn.textContent = '▶ Démarrer lecture guidée';
+  } else {
+    btn.textContent = '⏹ Arrêter';
+    startRead();
+  }
+}
+
+function startRead() {
+  wordIdx = 0;
+  const rd = document.getElementById('readingDisplay0');
+  const words = rd.querySelectorAll('.word');
+  if (!words.length) return;
+
+  function step() {
+    words.forEach((w, i) => {
+      w.classList.toggle('highlighted', i === wordIdx);
+      w.classList.toggle('done-word', i < wordIdx);
+    });
+    wordIdx++;
+    if (wordIdx >= words.length) {
+      stopRead();
+      document.getElementById('btnRead0').textContent = '↺ Relire';
+    }
+  }
+
+  step();
+  readInterval = setInterval(step, SPEED_MS[readSpeed]);
+}
+
+function stopRead() {
+  if (readInterval) { clearInterval(readInterval); readInterval = null; }
+  document.querySelectorAll('.word').forEach(w => {
+    w.classList.remove('highlighted', 'done-word');
+  });
+  const btn = document.getElementById('btnRead0');
+  if (btn) btn.textContent = '▶ Démarrer lecture guidée';
+}
+
+// ── STEP NAVIGATION ──
+function goStep(step) {
+  stopRead();
+  currentStep = step;
+
+  document.querySelectorAll('.step-tab').forEach((t, i) => t.classList.toggle('active', i === step));
+  document.querySelectorAll('.step-content').forEach((c, i) => c.classList.toggle('active', i === step));
+  document.querySelectorAll('.progress-seg').forEach((s, i) => {
+    s.classList.toggle('active', i === step);
+    s.classList.toggle('done', i < step);
+  });
+}
+
+// ── COMPLETE PHRASE ──
+function completePhrase() {
+  if (!donePhrases[currentLetter]) donePhrases[currentLetter] = new Set();
+  donePhrases[currentLetter].add(currentPhraseIdx);
+
+  phrasesCompleted++;
+  totalXP += 40;
+  updateStats();
+  showXpPopup('+40 XP · Phrase maîtrisée !');
+
+  // Update UI
+  const card = document.getElementById(`pcard-${currentPhraseIdx}`);
+  if (card) card.classList.add('completed');
+  document.querySelectorAll('.phrase-select-btn').forEach((b, i) => {
+    if (i === currentPhraseIdx) { b.textContent = '✓ Fait'; b.classList.remove('active'); b.classList.add('done'); }
+  });
+
+  // Mark progress strip full
+  document.querySelectorAll('.progress-seg').forEach(s => { s.classList.add('done'); s.classList.remove('active'); });
+
+  renderLetterGrid();
+  document.getElementById('exCard').classList.remove('visible');
+
+  // Auto-select next phrase if available
+  const phrases = PHRASES[currentLetter];
+  const nextIdx = phrases.findIndex((_, i) => i > currentPhraseIdx && !(donePhrases[currentLetter]?.has(i)));
+  if (nextIdx !== -1) {
+    setTimeout(() => selectPhrase(nextIdx), 600);
+  }
+}
+
+// ── STATS ──
+function updateStats() {
+  document.getElementById('statPhrases').textContent = phrasesCompleted;
+  document.getElementById('statXP').textContent = totalXP;
+}
+
+function updateTimer() {
+  const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+  const m = Math.floor(elapsed / 60);
+  const s = elapsed % 60;
+  document.getElementById('statTime').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+function showXpPopup(text) {
+  const el = document.createElement('div');
+  el.className = 'xp-popup';
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2200);
+}
+
+init();
+</script>
+</body>
+</html>
